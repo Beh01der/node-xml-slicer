@@ -1,0 +1,9 @@
+<root>
+    <item>
+        took out for text!
+        <sub-item id="id1">
+            <index>0</index>
+            <name type="simple">sub-item 1</name>
+        </sub-item>
+    </item>
+</root>

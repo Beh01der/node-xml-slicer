@@ -1,0 +1,30 @@
+{
+  "name": "node-xml-slicer",
+  "version": "1.0.0",
+  "description": "Simple xml to js transformer for node-expat - fastest XML parser for Node.js",
+  "main": "./lib/node-xml-slicer.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha"
+  },
+  "author": "Andrey Chausenko <andrey.chausenko@gmail.com> (https://memz.co)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Beh01der/node-xml-slicer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Beh01der/node-xml-slicer/issues"
+  },
+  "homepage": "https://github.com/Beh01der/node-xml-slicer",
+  "license": "ISC",
+  "keywords": [
+    "xml",
+    "json",
+    "sax",
+    "node-expat"
+  ],
+  "devDependencies": {
+    "chai": "^3.0.0",
+    "mocha": "^2.2.5",
+    "node-expat": "^2.3.8"
+  }
+}

@@ -1,0 +1,18 @@
+<root>
+    <item>
+        <sub-item>
+            <index>0</index>
+            <name>sub-item 1</name>
+        </sub-item>
+        <sub-item>
+            <index>1</index>
+            <name>sub-item 2</name>
+            <alias>sub-item 2 alias 1</alias>
+            <alias>sub-item 2 alias 2</alias>
+        </sub-item>
+        <sub-item>
+            <index>2</index>
+            <name>sub-item 3</name>
+        </sub-item>
+    </item>
+</root>
