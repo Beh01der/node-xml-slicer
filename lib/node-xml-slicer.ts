@@ -69,7 +69,7 @@ class Slicer {
                 if (nodeInfo.attrs) {
                     if (!nodeInfo.result) {
                         nodeInfo.result = {};
-                        nodeInfo.result['#'] = nodeInfo.text;
+                        nodeInfo.result[this.options.textAttrName] = nodeInfo.text;
                     }
 
                     for (var i in nodeInfo.attrs) {
@@ -85,7 +85,7 @@ class Slicer {
                 }
 
                 if (parentNodeInfo.text) {
-                    parentNodeInfo.result['#'] = parentNodeInfo.text;
+                    parentNodeInfo.result[this.options.textAttrName] = parentNodeInfo.text;
                 }
 
                 if (parentNodeInfo.result[nodeInfo.name]) {
