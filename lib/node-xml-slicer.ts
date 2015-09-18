@@ -1,3 +1,10 @@
+interface Options {
+    textAttrName?: string;
+    attrNameMutator?: (input: string) => string;
+    propNameMutator?: (input: string) => string;
+    valueMutator?: (input: any) => any;
+}
+
 class Slicer {
     private location = [];
     private rootPath;
@@ -8,11 +15,22 @@ class Slicer {
     private result_;
     private slicer;
 
-    constructor(parser, rootPath?: string) {
+    private options: Options;
+    private hasPropertyNameMutator: boolean = false;
+
+    constructor(parser, rootPath?: string, options?: Options) {
         this.rootPath = (rootPath || '').split('/').filter(i => { return !!i; });
         if (!this.rootPath.length) {
             this.rootPath = ['*'];
         }
+
+        this.options = {
+            textAttrName: '#',
+            attrNameMutator: (input) => { return input; },
+            valueMutator: (input) => { return input }
+        };
+        this.options = Object.assign(this.options, options || {});
+        this.hasPropertyNameMutator = this.options.propNameMutator !== undefined;
 
         parser.slicer = this;
         this.slicer = this;
@@ -53,7 +71,7 @@ class Slicer {
                 if (nodeInfo.attrs) {
                     if (!nodeInfo.result) {
                         nodeInfo.result = {};
-                        nodeInfo.result['#'] = nodeInfo.text;
+                        nodeInfo.result[this.options.textAttrName] = nodeInfo.text;
                     }
 
                     for (var i in nodeInfo.attrs) {
@@ -69,7 +87,7 @@ class Slicer {
                 }
 
                 if (parentNodeInfo.text) {
-                    parentNodeInfo.result['#'] = parentNodeInfo.text;
+                    parentNodeInfo.result[this.options.textAttrName] = parentNodeInfo.text;
                 }
 
                 if (parentNodeInfo.result[nodeInfo.name]) {
@@ -99,7 +117,7 @@ class Slicer {
             if (t.withinPath) {
                 text = text.replace(/^\s+|\s+$/, '');
                 if (text) {
-                    t.nodeInfo.text = text;
+                    t.nodeInfo.text = this.options.valueMutator(text);
                 }
             }
         });
@@ -119,7 +137,7 @@ class Slicer {
                 this.result_ = null;
             } else if (this.objectStack.length === 1) {
                 this.result_ = {};
-                this.result_[this.objectStack[0].name] = Slicer.itemResult(this.objectStack[0]);
+                this.result_[this.objectStack[0].name] = this.itemResult(this.objectStack[0]);
             } else {
                 this.result_ = {};
                 this.objectStack.forEach(item => {
@@ -128,26 +146,41 @@ class Slicer {
                             this.result_[item.name] = [this.result_[item.name]];
                         }
 
-                        this.result_[item.name].push(Slicer.itemResult(item));
+                        this.result_[item.name].push(this.itemResult(item));
                     } else {
-                        this.result_[item.name] = Slicer.itemResult(item);
+                        this.result_[item.name] = this.itemResult(item);
                     }
                 });
+            }
+
+            // After building the result object, re-map the property names
+            if (this.hasPropertyNameMutator && this.result_) {
+                var keys = Object.keys(this.result_);
+                var i;
+                for (i = 0; i < keys.length; i += 1) {
+                    var value = this.result_[keys[i]];
+                    var _key = this.options.propNameMutator(keys[i]);
+                    this.result_[_key] = value;
+                    if (keys[i] !== _key) {
+                        delete this.result_[keys[i]];
+                    }
+                }
             }
         }
 
         return this.result_;
     }
 
-    private static itemResult(item) {
+    private itemResult(item) {
         if (item.result) {
             return item.result;
         } else {
             if (item.attrs) {
-                var result = {'#': item.text};
+                var result = {};
+                result[this.options.textAttrName] = item.text;
                 for (var i in item.attrs) {
                     if (item.attrs.hasOwnProperty(i)) {
-                        result[i] = item.attrs[i];
+                        result[this.options.attrNameMutator(i)] = item.attrs[i];
                     }
                 }
                 return result;
