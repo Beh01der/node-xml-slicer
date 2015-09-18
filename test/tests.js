@@ -207,6 +207,23 @@ describe('Slicer', function(){
         });
     });
 
+    describe('parses XML and mutates property names', function(){
+        it('should return expected js object', function(){
+            var expected = {
+                'foo-name': {
+                    '#': 'sub-item 1',
+                    'type': 'simple'
+                }
+            };
+
+            var options = {
+                propNameMutator: function (input) { return 'foo-' + input }
+            };
+
+            chai.expect(processXml('03.xml', '/root/item/sub-item/name', options).result).to.eql(expected);
+        });
+    });
+
     describe('empty XML is handled without exceptions', function(){
         it('should return null', function(){
             var slicer = processXml();

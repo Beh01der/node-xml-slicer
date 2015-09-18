@@ -14,7 +14,9 @@ class Slicer {
     private objectStack = [];
     private result_;
     private slicer;
+
     private options: Options;
+    private hasPropertyNameMutator: boolean = false;
 
     constructor(parser, rootPath?: string, options?: Options) {
         this.rootPath = (rootPath || '').split('/').filter(i => { return !!i; });
@@ -25,10 +27,10 @@ class Slicer {
         this.options = {
             textAttrName: '#',
             attrNameMutator: (input) => { return input; },
-            propNameMutator: (input) => { return input; },
             valueMutator: (input) => { return input }
         };
         this.options = Object.assign(this.options, options || {});
+        this.hasPropertyNameMutator = this.options.propNameMutator !== undefined;
 
         parser.slicer = this;
         this.slicer = this;
@@ -149,6 +151,20 @@ class Slicer {
                         this.result_[item.name] = this.itemResult(item);
                     }
                 });
+            }
+
+            // After building the result object, re-map the property names
+            if (this.hasPropertyNameMutator && this.result_) {
+                var keys = Object.keys(this.result_);
+                var i;
+                for (i = 0; i < keys.length; i += 1) {
+                    var value = this.result_[keys[i]];
+                    var _key = this.options.propNameMutator(keys[i]);
+                    this.result_[_key] = value;
+                    if (keys[i] !== _key) {
+                        delete this.result_[keys[i]];
+                    }
+                }
             }
         }
 
