@@ -4,10 +4,10 @@ var Slicer = require('../lib/node-xml-slicer');
 
 var chai = require('chai');
 
-function processXml(xmlFile, rootPath) {
+function processXml(xmlFile, rootPath, slicerOptions) {
     var xml = xmlFile ? fs.readFileSync('./test/xml/' + xmlFile) : '';
     var parser = expat.createParser();
-    var slicer = new Slicer(parser, rootPath);
+    var slicer = new Slicer(parser, rootPath, slicerOptions);
     parser.write(xml);
     return slicer;
 }
@@ -170,6 +170,40 @@ describe('Slicer', function(){
             };
 
             chai.expect(processXml('03.xml', '/root/item/sub-item/name').result).to.eql(expected);
+        });
+    });
+
+    describe('parses XML and define text attribute name', function(){
+        it('should return expected js object', function(){
+            var expected = {
+                'name': {
+                    'text': 'sub-item 1',
+                    'type': 'simple'
+                }
+            };
+
+            var options = {
+                textAttrName: 'text'
+            };
+
+            chai.expect(processXml('03.xml', '/root/item/sub-item/name', options).result).to.eql(expected);
+        });
+    });
+
+    describe('parses XML and mutates attribute names', function(){
+        it('should return expected js object', function(){
+            var expected = {
+                'name': {
+                    '#': 'sub-item 1',
+                    'name-type': 'simple'
+                }
+            };
+
+            var options = {
+                attrNameMutator: function (input) { return 'name-' + input }
+            };
+
+            chai.expect(processXml('03.xml', '/root/item/sub-item/name', options).result).to.eql(expected);
         });
     });
 

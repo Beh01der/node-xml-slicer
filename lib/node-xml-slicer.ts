@@ -1,3 +1,10 @@
+interface Options {
+    textAttrName?: string;
+    attrNameMutator?: (input: string) => string;
+    propNameMutator?: (input: string) => string;
+    valueMutator?: (input: any) => any;
+}
+
 class Slicer {
     private location = [];
     private rootPath;
@@ -7,12 +14,21 @@ class Slicer {
     private objectStack = [];
     private result_;
     private slicer;
+    private options: Options;
 
-    constructor(parser, rootPath?: string) {
+    constructor(parser, rootPath?: string, options?: Options) {
         this.rootPath = (rootPath || '').split('/').filter(i => { return !!i; });
         if (!this.rootPath.length) {
             this.rootPath = ['*'];
         }
+
+        this.options = {
+            textAttrName: '#',
+            attrNameMutator: (input) => { return input; },
+            propNameMutator: (input) => { return input; },
+            valueMutator: (input) => { return input }
+        };
+        this.options = Object.assign(this.options, options || {});
 
         parser.slicer = this;
         this.slicer = this;
@@ -119,7 +135,7 @@ class Slicer {
                 this.result_ = null;
             } else if (this.objectStack.length === 1) {
                 this.result_ = {};
-                this.result_[this.objectStack[0].name] = Slicer.itemResult(this.objectStack[0]);
+                this.result_[this.objectStack[0].name] = this.itemResult(this.objectStack[0]);
             } else {
                 this.result_ = {};
                 this.objectStack.forEach(item => {
@@ -128,9 +144,9 @@ class Slicer {
                             this.result_[item.name] = [this.result_[item.name]];
                         }
 
-                        this.result_[item.name].push(Slicer.itemResult(item));
+                        this.result_[item.name].push(this.itemResult(item));
                     } else {
-                        this.result_[item.name] = Slicer.itemResult(item);
+                        this.result_[item.name] = this.itemResult(item);
                     }
                 });
             }
@@ -139,15 +155,16 @@ class Slicer {
         return this.result_;
     }
 
-    private static itemResult(item) {
+    private itemResult(item) {
         if (item.result) {
             return item.result;
         } else {
             if (item.attrs) {
-                var result = {'#': item.text};
+                var result = {};
+                result[this.options.textAttrName] = item.text;
                 for (var i in item.attrs) {
                     if (item.attrs.hasOwnProperty(i)) {
-                        result[i] = item.attrs[i];
+                        result[this.options.attrNameMutator(i)] = item.attrs[i];
                     }
                 }
                 return result;
