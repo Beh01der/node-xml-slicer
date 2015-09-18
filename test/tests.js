@@ -224,6 +224,23 @@ describe('Slicer', function(){
         });
     });
 
+    describe('parses XML and mutates values', function(){
+        it('should return expected js object', function(){
+            var expected = {
+                'index': 0
+            };
+
+            var options = {
+                valueMutator: function (input) {
+                    var int = parseInt(input, 10);
+                    return (!isNaN(int)) ? int : input;
+                }
+            };
+
+            chai.expect(processXml('03.xml', '/root/item/sub-item/index', options).result).to.eql(expected);
+        });
+    });
+
     describe('empty XML is handled without exceptions', function(){
         it('should return null', function(){
             var slicer = processXml();

@@ -117,7 +117,7 @@ class Slicer {
             if (t.withinPath) {
                 text = text.replace(/^\s+|\s+$/, '');
                 if (text) {
-                    t.nodeInfo.text = text;
+                    t.nodeInfo.text = this.options.valueMutator(text);
                 }
             }
         });
