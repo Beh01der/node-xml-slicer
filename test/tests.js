@@ -190,4 +190,13 @@ describe('Slicer', function(){
             chai.expect(slicer.errors.length).to.equal(1);
         });
     });
+
+    describe('handles large blocks of CDATA', function(){
+        var textFile = fs.readFileSync(__dirname + '/txt/4500.lorem').toString();
+        it('should match the text file', function(){
+            var slicer = processXml('05.xml', '/root/item');
+            chai.expect(slicer.result.item.length).to.equal(textFile.length);
+            chai.expect(slicer.result.item).to.equal(textFile);
+        });
+    });
 });

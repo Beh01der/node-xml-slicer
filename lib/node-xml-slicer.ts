@@ -49,11 +49,14 @@ class Slicer {
 
             if (t.withinPath) {
                 var nodeInfo = t.objectStack.pop();
+                var justWhitespace = /^\s+$/;
 
                 if (nodeInfo.attrs) {
                     if (!nodeInfo.result) {
                         nodeInfo.result = {};
-                        nodeInfo.result['#'] = nodeInfo.text;
+                        if (!justWhitespace.test(nodeInfo.text)) {
+                            nodeInfo.result['#'] = nodeInfo.text;
+                        }
                     }
 
                     for (var i in nodeInfo.attrs) {
@@ -68,8 +71,8 @@ class Slicer {
                     parentNodeInfo.result = {};
                 }
 
-                if (parentNodeInfo.text) {
-                    parentNodeInfo.result['#'] = parentNodeInfo.text;
+                if (parentNodeInfo.text && !justWhitespace.test(parentNodeInfo.text)) {
+                    parentNodeInfo.result['#'] = parentNodeInfo.text.trim();
                 }
 
                 if (parentNodeInfo.result[nodeInfo.name]) {
@@ -97,9 +100,13 @@ class Slicer {
         parser.on('text', text => {
             var t = this.slicer;
             if (t.withinPath) {
-                text = text.replace(/^\s+|\s+$/, '');
+                text = text.replace(/^ +$/, '');
                 if (text) {
-                    t.nodeInfo.text = text;
+                    if (!t.nodeInfo.text) {
+                        t.nodeInfo.text = text;
+                    } else {
+                        t.nodeInfo.text += text;
+                    }
                 }
             }
         });
